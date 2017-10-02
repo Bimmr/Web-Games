@@ -1,0 +1,142 @@
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	
+		<script>
+			var wins = [0,0];
+			var moves = 0;
+			var gridSize = 3;
+			var places = [];
+			var players = ["X", "O"];
+			var player = 0;
+			var scores = [0,0,0,0,0,0,0,0];
+			
+			function reset(){
+				places = [];
+				moves = 0;
+				scores = [0,0,0,0,0,0,0,0];
+				draw();
+			}
+			function hasWon(){
+				var expected = player == 0 ? -3 : 3;
+				
+				for(var i = 0; i <= scores.length; i++)
+					if(scores[i] == expected)
+						return true;
+			
+				return false;
+			}
+			
+			function getCurPlayerIcon(){
+				return players[player];
+			}
+			
+			function isOpen(pos){
+				return places[pos] == null;
+			}
+			
+			function take(pos){
+				moves++;
+				places[pos] = getCurPlayerIcon();
+				
+				var row = parseInt(pos/3);
+				var col = parseInt(pos%3);
+				
+				var score = player == 0 ? -1 : 1;
+				
+				scores[row] = scores[row] + score;
+				scores[gridSize+col] = scores[gridSize+col] + score;
+				
+				if(row == col)
+					scores[6] = scores[6] + score;
+				if(gridSize-1-row == col)
+					scores[7] = scores[7] + score;					
+			}
+			
+			function switchPlayer(){
+				if(player == 1)
+					player = 0;
+				else
+					player = 1;
+					
+				$("#status").text(getCurPlayerIcon()+"'s Turn");
+			}
+			
+			function draw(){
+				$("td").each(function(){
+					var element = $(this);
+					var pos = $(this).attr("id");
+					var val = places[pos];
+					element.text(val == null ? "" : val);
+				});
+			}
+			
+			$(function(){
+				$("td").click(function(){
+					var pos = $(this).attr("id");
+					if(isOpen(pos)){
+						take(pos)
+						draw();
+						if(hasWon()){
+							setTimeout(function(){
+								alert(getCurPlayerIcon()+"'s have won");
+								wins[player] = wins[player]+1;
+								$("#wins").text(wins[0]+" - "+ wins[1]);
+								reset();
+							}, 10);							
+						}else if(moves == 9){
+							setTimeout(function(){
+								alert("Tie!");
+								reset();
+							}, 10);
+						}else
+							switchPlayer();
+					}
+					
+				});
+			});
+		</script>
+		<style>
+		
+		td{
+			border: 1px solid black;
+			width: 100px;
+			height: 100px;
+			text-align: center;
+		}
+		#header{
+			width: 300px;
+			display: block
+		}
+		#header span{
+			width: 49%;
+			height: 25px;
+			text-align: center;
+			display: inline-block
+		}
+		</style>
+	</head>
+	<body>
+		<div id="header">
+			<span id="status">X's Turn</span>
+			<span id="wins">0-0</span>
+		</div>
+		<table>
+			<tr>
+				<td id="0"></td>
+				<td id="1"></td>
+				<td id="2"></td>
+			</tr>
+			<tr>
+				<td id="3"></td>
+				<td id="4"></td>
+				<td id="5"></td>
+			</tr>
+			<tr>
+				<td id="6"></td>
+				<td id="7"></td>
+				<td id="8"></td>
+			</tr>
+		</table>
+	</body>
+</html>
