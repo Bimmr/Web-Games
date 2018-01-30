@@ -3,140 +3,200 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	
 		<script>
-			var wins = [0,0];
-			var moves = 0;
-			var gridSize = 3;
-			var places = [];
-			var players = ["X", "O"];
-			var player = 0;
-			var scores = [0,0,0,0,0,0,0,0];
+			var wordStr = "computer mouse keyboard laptop gaming headset";
+			var words= wordStr.split(' ');
+			var word;
+			var guessedWord = [];
 			
 			function reset(){
-				places = [];
-				moves = 0;
-				scores = [0,0,0,0,0,0,0,0];
-				draw();
-			}
-			function hasWon(){
-				var expected = player == 0 ? -3 : 3;
+				clearCanvas();
+				drawHang();
+				guessedWord = [];
+				wrongGuesses = 0;
 				
-				for(var i = 0; i <= scores.length; i++)
-					if(scores[i] == expected)
-						return true;
-			
-				return false;
-			}
-			
-			function getCurPlayerIcon(){
-				return players[player];
-			}
-			
-			function isOpen(pos){
-				return places[pos] == null;
-			}
-			
-			function take(pos){
-				moves++;
-				places[pos] = getCurPlayerIcon();
-				
-				var row = parseInt(pos/3);
-				var col = parseInt(pos%3);
-				
-				var score = player == 0 ? -1 : 1;
-				
-				scores[row] = scores[row] + score;
-				scores[gridSize+col] = scores[gridSize+col] + score;
-				
-				if(row == col)
-					scores[6] = scores[6] + score;
-				if(gridSize-1-row == col)
-					scores[7] = scores[7] + score;					
-			}
-			
-			function switchPlayer(){
-				if(player == 1)
-					player = 0;
-				else
-					player = 1;
-					
-				$("#status").text(getCurPlayerIcon()+"'s Turn");
-			}
-			
-			function draw(){
-				$("td").each(function(){
-					var element = $(this);
-					var pos = $(this).attr("id");
-					var val = places[pos];
-					element.text(val == null ? "" : val);
+				addLetters();
+				$(".letter").off().click(function(){clickLetter($(this))});
+				$(document).off().keypress(function(event){
+					var l = event.which;
+					if(l>=97 && l <=122){
+						l = String.fromCharCode(l).toUpperCase();
+						clickLetter($('.letter:contains("'+l+'")'));						
+					}
 				});
+				word = words[Math.floor(Math.random() * words.length)].split('');
+				
+				for(var i = 0; i < word.length; i++)
+					guessedWord[i] = '_';
+					
+				update();
+					
+			}
+			function clearCanvas(){
+				var c = $("#game")[0];
+				var ctx = c.getContext("2d");
+				ctx.clearRect(0, 0, c.width, c.height);
+				ctx.beginPath();
+			}
+			function drawHang(){
+				var c = $("#game")[0];
+				var ctx = c.getContext("2d");
+				ctx.moveTo(75,1);
+				ctx.lineTo(75,c.height-10);
+				ctx.moveTo(0,c.height-10);
+				ctx.lineTo(150, c.height-10);
+				ctx.moveTo(75,1);
+				ctx.lineTo(c.width/2, 1);
+				ctx.moveTo(c.width/2,1);
+				ctx.lineTo(c.width/2, 20);
+				ctx.stroke();	
+			}
+			function guessLetter(letter){
+				var found = false;
+				for(var i = 0; i < word.length; i++)
+					if(word[i].toLowerCase() == letter.toLowerCase()){
+						guessedWord[i] = letter;
+						found = true;
+					}
+					update();
+				return found;
+			}
+			function addLimb(){
+				var topSpace = 20;
+				var headSize=40;
+				var bodyLength = 150;
+				var limbLength = 75;
+			
+				var c = $("#game")[0];
+				var ctx = c.getContext("2d");
+				switch(wrongGuesses){
+					case 1://Head
+						ctx.beginPath();
+						ctx.arc(c.width/2,headSize+topSpace,headSize,0,2 * Math.PI);
+						break;
+					case 2://Body
+						ctx.moveTo(c.width/2, headSize*2+topSpace);
+						ctx.lineTo(c.width/2, headSize*2+bodyLength+topSpace);
+						break;
+					case 3://Left
+						ctx.moveTo(c.width/2, headSize*2+topSpace);
+						ctx.lineTo(c.width/2.75, headSize*2+limbLength+topSpace);
+						break;
+					case 4://Right
+						ctx.moveTo(c.width/2, headSize*2+topSpace);
+						ctx.lineTo(c.width/2 + c.width/2-c.width/2.75, headSize*2+limbLength+topSpace);
+						break;
+					case 5://LLeft
+						ctx.moveTo(c.width/2, headSize*2+bodyLength+topSpace);
+						ctx.lineTo(c.width/2.75, headSize*2+bodyLength+limbLength+topSpace);
+						break;
+					case 6://Right
+						ctx.moveTo(c.width/2, headSize*2+bodyLength+topSpace);
+						ctx.lineTo(c.width/2 + c.width/2-c.width/2.75, headSize*2+bodyLength+limbLength+topSpace);
+						break;
+					default:
+						break;
+				}
+				ctx.stroke();
+			}
+			function update(){
+				var wordP = $("#word");
+				var w = "";
+				for(var i = 0; i < guessedWord.length; i++)
+					w = w + guessedWord[i] + " ";
+				wordP.text(w);
+			}
+			function addLetters(){
+				var lettersP = $("#letters");
+				var l = "";
+				for(var i = 65; i <= 90; i++)
+					l = l + "<span class='letter'>"+String.fromCharCode(i) + "</span> ";
+				lettersP.html(l);
+			}
+			function clickLetter(letter){
+				var l = letter;
+				console.log(l);
+				if(!l.hasClass("chosenLetter")){
+					l.addClass("chosenLetter");
+					if(guessLetter(l.text())){
+						if(guessedWord.indexOf('_') == -1){
+							setTimeout(function(){
+								alert("You got the word right!");
+								reset();
+							}, 100);
+						}
+					}else{
+						wrongGuesses += 1;
+						addLimb();
+						if(wrongGuesses>=6)
+						setTimeout(function(){
+							alert("You got the word wrong!\nIt was: "+word);
+							reset();
+						}, 100);
+					}
+				}
 			}
 			
 			$(function(){
-				$("td").click(function(){
-					var pos = $(this).attr("id");
-					if(isOpen(pos)){
-						take(pos)
-						draw();
-						if(hasWon()){
-							setTimeout(function(){
-								alert(getCurPlayerIcon()+"'s have won");
-								wins[player] = wins[player]+1;
-								$("#wins").text(wins[0]+" - "+ wins[1]);
-								reset();
-							}, 10);							
-						}else if(moves == 9){
-							setTimeout(function(){
-								alert("Tie!");
-								reset();
-							}, 10);
-						}else
-							switchPlayer();
-					}
-					
-				});
+				reset();
 			});
 		</script>
 		<style>
+			body{
+				background-color: #eee;
+				font-family: Impact, Charcoal, sans-serif;
+			}
+			#wordContainer{
+			    box-shadow: 0 5px 15px #666;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				padding: 10px 10px 10px;
+				background-color: #fff;
+				
+				height: 100px;
+				text-align:center;
+				font-size: 40px;
+				margin-bottom:10px
+			}
+			#gameWrapper{
+				width: 100vw;
+				height: auto;
+			}
+			#game{
+				padding-left: 0;
+				padding-right: 0;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+			}
+			#letters{
+				font-size: 50px;
+				text-align:center;
+			    box-shadow: 0 5px 15px #666;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				padding: 10px 10px 10px;
+				background-color: #fff;
+			}
+			.letter{
+				padding: 5px;
+				cursor: default;
+			}
+			.chosenLetter{
+				cursor: not-allowed;
+				color: #ccc
+			}
 		
-		td{
-			border: 1px solid black;
-			width: 100px;
-			height: 100px;
-			text-align: center;
-		}
-		#header{
-			width: 300px;
-			display: block
-		}
-		#header span{
-			width: 49%;
-			height: 25px;
-			text-align: center;
-			display: inline-block
-		}
 		</style>
 	</head>
 	<body>
-		<div id="header">
-			<span id="status">X's Turn</span>
-			<span id="wins">0-0</span>
+		<div id="wordContainer">
+			<p id="word"></p>
 		</div>
-		<table>
-			<tr>
-				<td id="0"></td>
-				<td id="1"></td>
-				<td id="2"></td>
-			</tr>
-			<tr>
-				<td id="3"></td>
-				<td id="4"></td>
-				<td id="5"></td>
-			</tr>
-			<tr>
-				<td id="6"></td>
-				<td id="7"></td>
-				<td id="8"></td>
-			</tr>
-		</table>
+		<div id="gameWrapper">
+			<canvas id="game" width="500px" height="400px"></canvas>
+		</div>
+		<div id="letterContainer">
+			<p id="letters"></p>
+		</div>
 	</body>
 </html>
