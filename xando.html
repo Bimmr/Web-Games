@@ -97,23 +97,37 @@
 			});
 		</script>
 		<style>
-		
-		td{
-			border: 1px solid black;
-			width: 100px;
-			height: 100px;
-			text-align: center;
-		}
-		#header{
-			width: 300px;
-			display: block
-		}
-		#header span{
-			width: 49%;
-			height: 25px;
-			text-align: center;
-			display: inline-block
-		}
+			body{
+				background-color: #eee;
+				font-family: Impact, Charcoal, sans-serif;
+			}
+			#header{
+				height: 100px;
+				text-align:center;
+				font-size: 40px;
+				margin-bottom: 20px;
+			}
+			#header span{
+				display:block;
+			}
+			td{
+				border: 1px solid black;
+				width: 100px;
+				height: 100px;
+				text-align: center;
+				font-size: 40px;
+			}
+			#gameWrapper{
+				width: 100vw;
+			}
+			#game{
+			    box-shadow: 0 5px 15px #666;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				padding: 10px 10px 10px;
+				background-color: #fff;
+				margin: 0 auto;
+			}
 		</style>
 	</head>
 	<body>
@@ -121,22 +135,24 @@
 			<span id="status">X's Turn</span>
 			<span id="wins">0-0</span>
 		</div>
-		<table>
-			<tr>
-				<td id="0"></td>
-				<td id="1"></td>
-				<td id="2"></td>
-			</tr>
-			<tr>
-				<td id="3"></td>
-				<td id="4"></td>
-				<td id="5"></td>
-			</tr>
-			<tr>
-				<td id="6"></td>
-				<td id="7"></td>
-				<td id="8"></td>
-			</tr>
-		</table>
+		<div id="gameWrapper">
+			<table id="game">
+				<tr>
+					<td id="0"></td>
+					<td id="1"></td>
+					<td id="2"></td>
+				</tr>
+				<tr>
+					<td id="3"></td>
+					<td id="4"></td>
+					<td id="5"></td>
+				</tr>
+				<tr>
+					<td id="6"></td>
+					<td id="7"></td>
+					<td id="8"></td>
+				</tr>
+			</table>
+		</div>
 	</body>
 </html>
