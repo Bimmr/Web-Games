@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
+	
+		<script>
+			var gameOver = false;
+			var defaultSize;
+			var body = [];
+			var blockSize = 10;
+			var direction = 0;
+			/*
+				1-up
+				2-down
+				3-left
+				4-right
+			*/
+			function reset(){
+				gameOver = false;
+				direction = 0;
+				body = [];
+				body[0] = {x: defaultSize.x/2, y: defaultSize.y/2};
+			}
+			function update(){
+				if(gameOver){
+					confirm("Game Over");
+					reset();
+				}else{
+					var nextX = body[0].x, nextY = body[0].y;
+					if(direction == 1)
+						nextY -= blockSize;
+					if(direction == 2)
+						nextY += blockSize;
+					if(direction == 3)
+						nextX -= blockSize;
+					if(direction == 4)
+						nextX += blockSize;
+					
+					if(nextX < 0 || nextX > defaultSize.x)
+						gameOver = true;
+					if(nextY < 0 || nextY > defaultSize.x)
+						gameOver = true;
+					
+					if(nextX != body[0].x || nextY != body[0].y)
+					{
+						body.unshift({x: nextX, y: nextY});
+						body.pop();
+					}
+				}
+			}
+			function draw(){
+				update();
+				
+				background(0, 0, 0);
+				fill(255);
+				
+				for(var i = 0; i < body.length; i++)
+					rect(body[0].x, body[0].y, blockSize, blockSize);
+					console.log(body.length);
+			
+			}
+			function setup(){
+				defaultSize = {x: windowWidth, y: 500};
+				body[0] = {x: defaultSize.x/2, y: defaultSize.y/2};
+				
+				var canvas = createCanvas(defaultSize.x, defaultSize.y);
+				canvas.parent("gameWrapper");
+				background(0, 0, 0);
+				frameRate(10);
+				$(document).keypress(function(event){
+						var l = event.which;
+						if(l == 119)
+							direction = 1;
+						else if(l == 115)
+							direction = 2;
+						else if(l == 97)
+							direction = 3;
+						else if(l == 100)
+							direction = 4;
+					});
+			}
+		</script>
+		<style>
+			body{
+				background-color: #eee;
+				font-family: Impact, Charcoal, sans-serif;
+			}
+			#headerWrapper{
+			    box-shadow: 0 5px 15px #666;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				padding: 10px 10px 10px;
+				background-color: #fff;
+				
+				height: auto;
+				text-align:center;
+				font-size: 20px;
+				margin-bottom:10px
+			}
+			#header p{
+				margin: 10px 0px;
+			}
+			#gameWrapper{
+				width: 100vw;
+				height: 500px;
+				position: relative;
+			}
+			#game{
+				padding-left: 0;
+				padding-right: 0;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="headerWrapper">
+			<div id="header">
+				<p>Top Score: 0</p>
+				<p>Current Score: 0</p>
+			</div>
+		</div>
+		<div id="gameWrapper">
+		
+		</div>
+		
+	</body>
+</html>
